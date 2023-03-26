@@ -1,0 +1,150 @@
+﻿@page "/"
+@using MAUIAndroidReleaseTool.Services
+
+<MContainer Fluid Style="height:100vh;width:100vw;" Class="d-flex align-center">
+    <MSheet Class="flex-grow-1">
+        <MForm Model="Release" EnableValidation="true" OnValidSubmit="ReleaseStart">
+            <MRow>
+                <MCol>
+                    <MTextField TValue="string"
+                                @bind-Value="Release.Path"
+                                Class="rounded-lg"
+                                Readonly="true"
+                                Label="项目路径"
+                                Outlined="true">
+                    </MTextField>
+                </MCol>
+                <MCol Cols="2">
+                    <MButton XLarge="true"
+                             Class="rounded-lg"
+                             Block="true"
+                             OnClick="PickCsprojFile">
+                        选择项目文件
+                    </MButton>
+                </MCol>
+            </MRow>
+            <MRow>
+                <MCol>
+                    <MTextField TValue="string"
+                                @bind-Value="Release.KeystorePath"
+                                Class="rounded-lg"
+                                Readonly="true"
+                                Label="密钥存储文件路径"
+                                Outlined="true">
+                    </MTextField>
+                </MCol>
+                <MCol Cols="3">
+                    <MButton XLarge="true"
+                             Class="rounded-lg"
+                             Block="true"
+                             Disabled="@(string.IsNullOrEmpty(Release.Path) || !string.IsNullOrEmpty(Release.KeystorePath))"
+                             OnClick="CreateKeystore">
+                        创建密钥存储文件
+                    </MButton>
+                </MCol>
+                <MCol Cols="2">
+                    <MButton XLarge="true"
+                             Class="rounded-lg"
+                             Block="true"
+                             Disabled="@(string.IsNullOrEmpty(Release.Path))"
+                             OnClick="SetKeystore">
+                        刷新状态
+                    </MButton>
+                </MCol>
+            </MRow>
+            <MRow>
+                <MCol Cols="12" Md="4">
+                    <MSelect TItem="SelectItem"
+                             TItemValue="string"
+                             TValue="string"
+                             Label=".NET版本"
+                             @bind-Value="Release.Framework"
+                             Class="rounded-lg"
+                             Outlined="true"
+                             OnChange="(value)=>ReleaseItemChanged(SettingType.Framework,value)"
+                             Items="Frameworks"
+                             ItemText="r=>r.Text"
+                             ItemValue="r=>r.Value">
+                    </MSelect>
+                </MCol>
+                <MCol Cols="12" Md="4">
+                    <MSelect TItem="SelectItem"
+                             TItemValue="string"
+                             TValue="string"
+                             Label="系统架构"
+                             @bind-Value="Release.Runtime"
+                             Class="rounded-lg"
+                             Outlined="true"
+                             OnChange="(value)=>ReleaseItemChanged(SettingType.Runtime,value)"
+                             Items="Runtimes"
+                             ItemText="r=>r.Text"
+                             ItemValue="r=>r.Value">
+                    </MSelect>
+                </MCol>
+                <MCol Cols="12" Md="4">
+                    <MSelect TItem="SelectItem"
+                             TItemValue="string"
+                             TValue="string" 
+                             Label="包含运行时"
+                             @bind-Value="Release.SelfContained"
+                             Class="rounded-lg"
+                             OnChange="(value)=>ReleaseItemChanged(SettingType.SelfContained,value)"
+                             Outlined="true"
+                             Items="SelfContaineds"
+                             ItemText="r=>r.Text"
+                             ItemValue="r=>r.Value">
+                    </MSelect>
+                </MCol>
+            </MRow>
+            <MRow>
+                <MCol Cols="12" Md="4">
+                    <MSelect TItem="SelectItem"
+                             TItemValue="string"
+                             TValue="string"
+                             Label="剪裁"
+                             @bind-Value="Release.Trimmed"
+                             Class="rounded-lg"
+                             OnChange="(value)=>ReleaseItemChanged(SettingType.Trimmed,value)"
+                             Outlined="true"
+                             Items="Trimmeds"
+                             ItemText="r=>r.Text"
+                             ItemValue="r=>r.Value">
+                    </MSelect>
+                </MCol>
+                <MCol Cols="12" Md="4">
+                    <MRow>
+                        <MCol>
+                            <MTextField TValue="string"
+                                        @bind-Value="Release.Password"
+                                        Class="rounded-lg"
+                                        Disabled="@(string.IsNullOrEmpty(Release.KeystorePath))"
+                                        Label="密钥存储文件密码"
+                                        Outlined="true">
+                            </MTextField>
+                        </MCol>
+                    </MRow>
+                </MCol>
+            </MRow>
+            <MRow>
+                <MCol>
+                    <MTextField TValue="string"
+                                Value="CMD"
+                                Class="rounded-lg"
+                                Readonly="true"
+                                Outlined="true">
+                    </MTextField>
+                </MCol>
+                <MCol Cols="2">
+                    <MButton XLarge="true"
+                             Color="primary"
+                             Dark="true"
+                             Block="true"
+                             Type="submit">
+                        开始打包
+                    </MButton>
+                </MCol>
+            </MRow>
+        </MForm>
+    </MSheet>
+</MContainer>
+
