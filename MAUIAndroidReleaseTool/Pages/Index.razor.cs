@@ -25,7 +25,7 @@ namespace MAUIAndroidReleaseTool.Pages
         }
         private ReleaseModel Release { get; set; } = new();
         private string CMD => $"dotnet publish -c:Release{Release.Runtime}{Release.Framework}{Release.Trimmed}{Release.SelfContained}{Keystore}";
-        private string Keystore => $" /p:AndroidSigningKeyPass={Release.Password} /p:AndroidSigningStorePass={Release.Password}";
+        private string Keystore => $" -p:AndroidPackageFormat=apk -p:AndroidKeyStore=true -p:AndroidSigningKeyStore=myapp.keystore -p:AndroidSigningKeyAlias=key -p:AndroidSigningKeyPass={Release.Password} -p:AndroidSigningStorePass={Release.Password}";
         private List<SelectItem> Frameworks = new()
         {
             new(".NET 7"," -f:net7.0-android" ),
