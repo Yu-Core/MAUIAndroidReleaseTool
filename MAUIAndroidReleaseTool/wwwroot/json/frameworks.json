@@ -1,14 +1,14 @@
 [
   {
     "Text": ".NET 8",
-    "Value": " -f:net8.0-android"
+    "Value": "net8.0-android"
   },
   {
     "Text": ".NET 7",
-    "Value": " -f:net7.0-android"
+    "Value": "net7.0-android"
   },
   {
     "Text": ".NET 6",
-    "Value": " -f:net6.0-android"
+    "Value": "net6.0-android"
   }
 ]

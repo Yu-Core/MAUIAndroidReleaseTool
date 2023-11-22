@@ -36,7 +36,9 @@ namespace MAUIAndroidReleaseTool.Pages
             await base.OnInitializedAsync();
         }
 
-        private string CMD => $"dotnet publish -c:Release -p:AndroidPackageFormat=apk{Release.Runtime}{Release.Framework}{Release.Trimmed}{KeystoreCommand}";
+        private string CMD => $"dotnet publish -c:Release -p:AndroidPackageFormat=apk{FrameworkCommand}{Release.Runtime}{Release.Trimmed}{KeystoreCommand}";
+
+        private string FrameworkCommand => $" -f:{Release.Framework}";
 
         private string KeystoreFileName => Path.GetFileName(Release.KeystorePath);
 
@@ -86,6 +88,11 @@ namespace MAUIAndroidReleaseTool.Pages
             Release.Path = Path.GetDirectoryName(path);
             await SetKeystore();
             await SettingsService.Save(Setting.Path, Release.Path);
+
+            var csprojFileContent = await File.ReadAllTextAsync(path);
+            var framework = Frameworks.FirstOrDefault(it => csprojFileContent.Contains(it.Value));
+            Release.Framework = framework.Value;
+            await SettingsService.Save(Setting.Framework, Release.Framework);
         }
 
         private void CreateKeystore()
