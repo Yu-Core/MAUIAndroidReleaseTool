@@ -1,0 +1,14 @@
+[
+  {
+    "Text": "全部(包括arm32)",
+    "Value": ""
+  },
+  {
+    "Text": "arm64",
+    "Value": " -r android-arm64 --sc"
+  },
+  {
+    "Text": "x64",
+    "Value": " -r android-x64 --sc"
+  }
+]

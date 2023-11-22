@@ -1,0 +1,7 @@
+{
+  "Path": "",
+  "Runtime": " -r android-arm64 --sc",
+  "Password": "",
+  "Framework": " -f:net7.0-android",
+  "Trimmed": " -p:PublishTrimmed=true"
+}

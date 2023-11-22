@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using MAUIAndroidReleaseTool.Models
 @using MAUIAndroidReleaseTool.Services
 
 <MContainer Fluid Style="height:100vh;width:100vw;" Class="d-flex align-center">
@@ -61,7 +62,7 @@
                              @bind-Value="Release.Framework"
                              Class="rounded-lg"
                              Outlined="true"
-                             OnChange="(value)=>ReleaseItemChanged(SettingType.Framework,value)"
+                             OnChange="(value)=>ReleaseItemChanged(Setting.Framework,value)"
                              Items="Frameworks"
                              ItemText="r=>r.Text"
                              ItemValue="r=>r.Value">
@@ -75,22 +76,8 @@
                              @bind-Value="Release.Runtime"
                              Class="rounded-lg"
                              Outlined="true"
-                             OnChange="(value)=>ReleaseItemChanged(SettingType.Runtime,value)"
+                             OnChange="(value)=>ReleaseItemChanged(Setting.Runtime,value)"
                              Items="Runtimes"
-                             ItemText="r=>r.Text"
-                             ItemValue="r=>r.Value">
-                    </MSelect>
-                </MCol>
-                <MCol Cols="12" Md="4">
-                    <MSelect TItem="SelectItem"
-                             TItemValue="string"
-                             TValue="string" 
-                             Label="包含运行时"
-                             @bind-Value="Release.SelfContained"
-                             Class="rounded-lg"
-                             OnChange="(value)=>ReleaseItemChanged(SettingType.SelfContained,value)"
-                             Outlined="true"
-                             Items="SelfContaineds"
                              ItemText="r=>r.Text"
                              ItemValue="r=>r.Value">
                     </MSelect>
@@ -104,7 +91,7 @@
                              Label="剪裁"
                              @bind-Value="Release.Trimmed"
                              Class="rounded-lg"
-                             OnChange="(value)=>ReleaseItemChanged(SettingType.Trimmed,value)"
+                             OnChange="(value)=>ReleaseItemChanged(Setting.Trimmed,value)"
                              Outlined="true"
                              Items="Trimmeds"
                              ItemText="r=>r.Text"

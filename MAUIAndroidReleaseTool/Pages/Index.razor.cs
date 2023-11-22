@@ -1,90 +1,67 @@
 ﻿using Masa.Blazor;
+using MAUIAndroidReleaseTool.Models;
 using MAUIAndroidReleaseTool.Services;
 using Microsoft.AspNetCore.Components;
-using System.ComponentModel.DataAnnotations;
 
 namespace MAUIAndroidReleaseTool.Pages
 {
     public partial class Index
     {
-        public class ReleaseModel
-        {
-            [Required]
-            public string Path { get; set; }
-            [Required]
-            public string Framework { get; set; }
-            [Required]
-            public string Runtime { get; set; }
-            [Required]
-            public string Password { get; set; }
-            public string Trimmed { get; set; }
-            [Required]
-            public string SelfContained { get; set; }
-            [Required]
-            public string KeystorePath { get; set; }
-        }
         private ReleaseModel Release { get; set; } = new();
-        private string CMD => $"dotnet publish -c:Release{Release.Runtime}{Release.Framework}{Release.Trimmed}{Release.SelfContained}{Keystore}";
-        private string Keystore => $" -p:AndroidPackageFormat=apk -p:AndroidKeyStore=true -p:AndroidSigningKeyStore=myapp.keystore -p:AndroidSigningKeyAlias=key -p:AndroidSigningKeyPass={Release.Password} -p:AndroidSigningStorePass={Release.Password}";
-        private List<SelectItem> Frameworks = new()
-        {
-            new(".NET 7"," -f:net7.0-android" ),
-            new(".NET 6"," -f:net6.0-android" )
-        };
-        private List<SelectItem> Runtimes = new()
-        {
-            new("arm64"," -r android-arm64" ),
-            new ("x64"," -r android-x64" )
-        };
-        private List<SelectItem> SelfContaineds = new()
-        {
-            new("包含.NET运行时"," --sc" ),
-            new ("不包含.NET运行时"," --no-self-contained" )
-        };
-        private List<SelectItem> Trimmeds = new()
-        {
-            new("剪裁"," -p:PublishTrimmed=true" ),
-            new ("不剪裁","" )
-        };
-        private class SelectItem
-        {
-            public SelectItem(string text, string value)
-            {
-                Text = text;
-                Value = value;
-            }
 
-            public string Text { get; set; }
-            public string Value { get; set; }
-        }
+        private List<SelectItem> Frameworks = new();
+
+        private List<SelectItem> Runtimes = new();
+
+        private List<SelectItem> Trimmeds = new();
+
+        private string DefaultKeystoreFileName = "myapp.keystore";
 
         [Inject]
-        private ISettingsService SettingsService { get; set; }
+        private IStaticWebAssets StaticWebAssets { get; set; } = default!;
+
         [Inject]
-        private ISystemService SystemService { get; set; }
+        private ISettingsService SettingsService { get; set; } = default!;
+
         [Inject]
-        private IPopupService PopupService { get; set; }
+        private ISystemService SystemService { get; set; } = default!;
+
+        [Inject]
+        private IPopupService PopupService { get; set; } = default!;
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadSettings();
+            await LoadDefaultSelectItemsAsync();
+            await LoadSettingsAsync();
             await base.OnInitializedAsync();
         }
 
-        private async Task LoadSettings()
+        private string CMD => $"dotnet publish -c:Release -p:AndroidPackageFormat=apk{Release.Runtime}{Release.Framework}{Release.Trimmed}{KeystoreCommand}";
+
+        private string KeystoreFileName => Path.GetFileName(Release.KeystorePath);
+
+        private string KeystoreCommand
+            => string.IsNullOrWhiteSpace(Release.KeystorePath) ? "" : $" -p:AndroidKeyStore=true -p:AndroidSigningKeyStore={KeystoreFileName} -p:AndroidSigningKeyAlias=key -p:AndroidSigningKeyPass={Release.Password} -p:AndroidSigningStorePass={Release.Password}";
+
+        private async Task LoadDefaultSelectItemsAsync()
         {
-            Release.Path = await SettingsService.Get(SettingType.Path);
-            Release.Runtime = await SettingsService.Get(SettingType.Runtime);
-            Release.SelfContained = await SettingsService.Get(SettingType.SelfContained);
-            Release.Framework = await SettingsService.Get(SettingType.Framework);
-            Release.Trimmed = await SettingsService.Get(SettingType.Trimmed);
-            Release.Password = await SettingsService.Get(SettingType.Password);
+            Frameworks = await StaticWebAssets.ReadJsonAsync<List<SelectItem>>("json/frameworks.json");
+            Runtimes = await StaticWebAssets.ReadJsonAsync<List<SelectItem>>("json/runtimes.json");
+            Trimmeds = await StaticWebAssets.ReadJsonAsync<List<SelectItem>>("json/trimmeds.json");
+        }
+
+        private async Task LoadSettingsAsync()
+        {
+            Release.Path = await SettingsService.Get<string>(Setting.Path);
+            Release.Runtime = await SettingsService.Get<string>(Setting.Runtime);
+            Release.Framework = await SettingsService.Get<string>(Setting.Framework);
+            Release.Trimmed = await SettingsService.Get<string>(Setting.Trimmed);
+            Release.Password = await SettingsService.Get<string>(Setting.Password);
 
             await SetKeystore();
         }
         private async Task SetKeystore()
         {
-           
             if (Directory.Exists(Release.Path))
             {
                 DirectoryInfo TheFolder = new DirectoryInfo(Release.Path);
@@ -108,24 +85,24 @@ namespace MAUIAndroidReleaseTool.Pages
                 return;
             Release.Path = Path.GetDirectoryName(path);
             await SetKeystore();
-            await SettingsService.Save(SettingType.Path, Release.Path);
+            await SettingsService.Save(Setting.Path, Release.Path);
         }
 
         private void CreateKeystore()
         {
-            string keyName = Path.Combine(Release.Path, "myapp.keystore");
+            string keyName = Path.Combine(Release.Path, DefaultKeystoreFileName);
             string cmd = $"keytool -genkey -v -keystore {keyName} -alias key -keyalg RSA -keysize 2048 -validity 10000";
             SystemService.RunCMD(cmd);
         }
 
-        private async Task ReleaseItemChanged(SettingType type,string value)
+        private async Task ReleaseItemChanged(Setting type, string value)
         {
             await SettingsService.Save(type, value);
         }
 
         private async Task ReleaseStart()
         {
-            await SettingsService.Save(SettingType.Password, Release.Password);
+            await SettingsService.Save(Setting.Password, Release.Password);
             string cmd = $"cd {Release.Path}&{CMD}";
             SystemService.RunCMD(cmd);
         }

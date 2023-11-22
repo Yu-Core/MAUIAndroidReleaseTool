@@ -1,0 +1,10 @@
+[
+  {
+    "Text": "剪裁",
+    "Value": " -p:PublishTrimmed=true"
+  },
+  {
+    "Text": "不剪裁",
+    "Value": ""
+  }
+]

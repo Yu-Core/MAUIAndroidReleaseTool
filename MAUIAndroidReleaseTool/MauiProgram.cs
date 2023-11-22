@@ -22,8 +22,9 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 		builder.Services.AddMasaBlazor();
+		builder.Services.AddSingleton<IStaticWebAssets, StaticWebAssets>();
 		builder.Services.AddSingleton<ISettingsService, SettingsService>();
-		builder.Services.AddSingleton<ISystemService, SystemService>();
+        builder.Services.AddSingleton<ISystemService, SystemService>();
 
         return builder.Build();
 	}

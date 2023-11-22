@@ -1,18 +1,18 @@
-﻿
+﻿using MAUIAndroidReleaseTool.Models;
+using System.Text.Json;
+
 namespace MAUIAndroidReleaseTool.Services
 {
     public class SettingsService : ISettingsService
     {
-        private readonly Dictionary<SettingType, dynamic> Settings = new()
+        private Lazy<Dictionary<Setting, object>> _defalutSettings;
+
+        private Dictionary<Setting, object> DefalutSettings => _defalutSettings.Value;
+
+        public SettingsService(IStaticWebAssets staticWebAssets)
         {
-            {SettingType.Path,"" },
-            {SettingType.Runtime," -r android-arm64" },
-            {SettingType.Password,"" },
-            {SettingType.Framework," -f:net7.0-android" },
-            {SettingType.Trimmed," -p:PublishTrimmed=true" },
-            {SettingType.SelfContained," --sc" },
-        };
-        private Dictionary<SettingType, object> DefalutSettings = new();
+            _defalutSettings = new(()=> staticWebAssets.ReadJsonAsync<Dictionary<Setting, object>>("json/default-settings.json").Result);
+        }
 
         public Task<bool> ContainsKey(string key)
         {
@@ -26,33 +26,20 @@ namespace MAUIAndroidReleaseTool.Services
             return Task.FromResult(result);
         }
 
-        public async Task<dynamic> Get(SettingType type)
+        public Task<T> Get<T>(Setting type)
         {
-            var defaultValue = Settings[type];
-            return await Get(type, defaultValue);
+            if (DefalutSettings[type] is JsonElement element)
+            {
+                DefalutSettings[type] = element.Deserialize<T>();
+            }
+
+            return Get(type, (T)DefalutSettings[type]);
         }
 
-        public Task<T> Get<T>(SettingType type)
+        public Task<T> Get<T>(Setting type, T defaultValue)
         {
-            var defaultValue = Settings[type];
-            return Get(type, defaultValue);
-        }
-
-        public Task<T> Get<T>(SettingType type, T defaultValue)
-        {
-            var key = Enum.GetName(typeof(SettingType), type);
+            var key = Enum.GetName(typeof(Setting), type);
             return Get(key!, defaultValue);
-        }
-
-        public T GetDefault<T>(SettingType type)
-        {
-            return (T)DefalutSettings[type];
-        }
-
-        public async Task InitDefault<T>(SettingType type)
-        {
-            T value = await Get<T>(type);
-            DefalutSettings.Add(type, value!);
         }
 
         public Task Save<T>(string key, T value)
@@ -61,9 +48,9 @@ namespace MAUIAndroidReleaseTool.Services
             return Task.CompletedTask;
         }
 
-        public Task Save<T>(SettingType type, T value)
+        public Task Save<T>(Setting type, T value)
         {
-            var key = Enum.GetName(typeof(SettingType), type);
+            var key = Enum.GetName(typeof(Setting), type);
             return Save(key!, value);
         }
     }
