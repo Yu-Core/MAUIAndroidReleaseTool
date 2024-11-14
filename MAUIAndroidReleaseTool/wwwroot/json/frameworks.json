@@ -1,4 +1,8 @@
-[
+﻿[
+  {
+    "Text": ".NET 9",
+    "Value": "net9.0-android"
+  },
   {
     "Text": ".NET 8",
     "Value": "net8.0-android"
